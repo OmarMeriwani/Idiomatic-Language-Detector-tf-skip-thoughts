@@ -82,8 +82,7 @@ for i in range(0, len(df1)):
 
     context = ' '.join([stem for word,c5,pos,stem in  StemmedSentence]) + ' '.join([stem for word,c5,pos,stem in  StemmedSentencePre]) + ' '.join([stem for word,c5,pos,stem in  StemmedSentencePOST])
     count = context.count(VNC[1])
-    if count > 1:
-        print(count)
+    SentenceLength = len(StemmedSentence)
     #counter = Counter(context)
     #if (counter[VNC[1]] != 0):
     #    print(counter[VNC[1]])
