@@ -2,11 +2,10 @@ import numpy as np
 import pandas as pd
 from ast import literal_eval
 from collections import Counter
-
+from senticnet.senticnet import SenticNet
 import re
 
 df1 = pd.read_csv('Dataset4.csv')
-pdd = pd.DataFrame(columns=['Usage','Idiom','SenenceNo','Location','Sentence','SentenceBefore','SentenceAfter','SentenceSTEM','SentenceSTEMBefore','SentenceSTEMAfter'])
 #POSc5,Pre1C5,Pre2C5,Post1C5,Post2C5,InBetweenC5,NumberOfWords,Bigram, PreBigram
 seq = 0
 df1['Sentence'] = df1['Sentence'].apply(literal_eval)
@@ -21,6 +20,22 @@ def FindIndexes(word, Setnence):
             indexes.append(index)
         index += 1
     return indexes
+
+def SentimentsAVGPolarity(sentence):
+    sn = SenticNet()
+    values = []
+    sentence = [stem for word,c5, pos, stem in sentence ]
+    for stem in sentence:
+        try:
+            polarity_value = sn.polarity_intense(stem)
+            #print(polarity_value)
+            values.append(float(polarity_value))
+        except Exception as e:
+            #print(stem ,'::', e)
+            continue
+    if len(values) == 0:
+        return 0.0
+    return float(sum(values) / len(values))
 
 
 def DistanceAndWordsBetween(sentence, words, isPOS):
@@ -65,29 +80,46 @@ def DistanceAndWordsBetween(sentence, words, isPOS):
             wordsBetween.append(sentence[i][1])
     result.append([wordsBetween,len(wordsBetween),posPre,posPre2,posPost,posPost2])
     return result
+pdd = pd.DataFrame(columns=['Sentence','Usage','Idiom','BetweenPOS','NumOfWordsBetween','PrePOS','prePOS2','postPOS','postPOS2','CountOfSameNounInContext','SentenceLength','SentimentsAVG'])
+#                           sentence,usage,idiom,WordsBetween,NumOfWordsBetween,prePOS,prePOS2,postPOS,postPOS2,CountOfSameNounInContext, SentenceLength,sentiments
 for i in range(0, len(df1)):
     StemmedSentence = pd.DataFrame()
     StemmedSentence = df1.loc[i].values[5]
     StemmedSentencePre = df1.loc[i].values[6]
     StemmedSentencePOST = df1.loc[i].values[7]
+    idiom = str(df1.loc[i].values[2])
+    usage = str(df1.loc[i].values[1])
 
     NumberOfWords = len(StemmedSentence)
     VNC = str(df1.loc[i].values[2]).split('_')
     #print(df1.loc[i].values[0])
     #print(df1.loc[i].values[2])
-
+    prePOS = ''
+    prePOS2 = ''
+    postPOS = ''
+    postPOS2 = ''
+    WordsBetween = []
+    NumOfWordsBetween = 0
     distAndNumber = DistanceAndWordsBetween(StemmedSentence,VNC,False)
-    #if distAndNumber != None:
-    #    print(distAndNumber[0][3])
+    if distAndNumber != None:
+        WordsBetween = distAndNumber[0][0]
+        NumOfWordsBetween = distAndNumber[0][1]
+        prePOS = distAndNumber[0][2]
+        prePOS2 = distAndNumber[0][3]
+        postPOS = distAndNumber[0][4]
+        postPOS2 = distAndNumber[0][5]
 
+    sentence = ' '.join([stem for word,c5,pos,stem in  StemmedSentence])
     context = ' '.join([stem for word,c5,pos,stem in  StemmedSentence]) + ' '.join([stem for word,c5,pos,stem in  StemmedSentencePre]) + ' '.join([stem for word,c5,pos,stem in  StemmedSentencePOST])
-    count = context.count(VNC[1])
+    CountOfSameNounInContext = context.count(VNC[1])
     SentenceLength = len(StemmedSentence)
-    #counter = Counter(context)
-    #if (counter[VNC[1]] != 0):
-    #    print(counter[VNC[1]])
-    #print(VNC)
-    #pdd.loc[seq] = [df1.loc[i].values[1],df1.loc[i].values[2],df1.loc[i].values[3],df1.loc[i].values[4],df1.loc[i].values[5],df1.loc[i].values[6],
-    #                df1.loc[i].values[7],df2.loc[i].values[5],df2.loc[i].values[6],df2.loc[i].values[7]]
+
+    sentiments = SentimentsAVGPolarity(StemmedSentence)
+    #Sentence,Usage,Idiom,POSBetween,NumOfWordsBetween,PrePOS,prePOS2,postPOS,postPOS2,CountOfSameNounInContext,SentenceLength,SentimentsAVG
+    pdd.loc[seq] = [sentence,usage,idiom,WordsBetween,NumOfWordsBetween,prePOS,prePOS2,postPOS,postPOS2,CountOfSameNounInContext,
+                    SentenceLength,sentiments]
     seq += 1
-print(pdd)
+    if seq %10 == 0:
+        print(seq)
+        pdd.to_csv('Dataset5.csv')
+#print(pdd)
