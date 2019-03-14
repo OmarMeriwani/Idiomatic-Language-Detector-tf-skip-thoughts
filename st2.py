@@ -1,20 +1,16 @@
-import tensorflow as tf
-from gensim.models import KeyedVectors
+import numpy
+import pandas as pd
 
-import skip_thoughts
+df = pd.read_csv('Dataset-Skip-Thoughts.csv')
+length = {}
+for i in range(0, len(df)):
 
-# Initialize the word2vec and skip-thoughts models only once:
-word2vec_model = KeyedVectors.load('E:/Data/GoogleNews-vectors-negative300.bin.gz', mmap='r')
-graph = tf.Graph()
-with graph.as_default():
-    # Refer to the constructor docstring for more information on the arguments.
-    model = skip_thoughts.SkipThoughts(word2vec_model, **kwargs)
-
-with tf.Session(graph=graph):
-    # Restore the model only once.
-    # Here, `save_dir` is the directory where the .ckpt files live. Typically
-    # this would be "output/mymodel" where --model_name=mymodel in train.py.
-    model.restore('')
-
-    # Run the model like this as many times as desired.
-    print(model.encode(['asdas dasdasda skjaksdask', 'asdas kjhare tretrete']))
+    sentenceVector = df.loc[i].values[1]
+    sentenceVector = str(sentenceVector)
+    sentenceVector = sentenceVector.split(',')
+    x = length.get(str(len(sentenceVector)))
+    if (x != None):
+        length[str(len(sentenceVector))] = int(x) + 1
+    else:
+        length[str(len(sentenceVector))] =  1
+print(length)

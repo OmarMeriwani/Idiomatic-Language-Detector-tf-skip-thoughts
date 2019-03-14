@@ -82,6 +82,7 @@ def DistanceAndWordsBetween(sentence, words, isPOS):
     return result
 pdd = pd.DataFrame(columns=['Sentence','Usage','Idiom','BetweenPOS','NumOfWordsBetween','PrePOS','prePOS2','postPOS','postPOS2','CountOfSameNounInContext','SentenceLength','SentimentsAVG'])
 #                           sentence,usage,idiom,WordsBetween,NumOfWordsBetween,prePOS,prePOS2,postPOS,postPOS2,CountOfSameNounInContext, SentenceLength,sentiments
+pdd2 = pd.DataFrame(columns=['SentencePre','Sentence','SentencePost','Idiom','Usage'])
 for i in range(0, len(df1)):
     StemmedSentence = pd.DataFrame()
     StemmedSentence = df1.loc[i].values[5]
@@ -110,16 +111,20 @@ for i in range(0, len(df1)):
         postPOS2 = distAndNumber[0][5]
 
     sentence = ' '.join([stem for word,c5,pos,stem in  StemmedSentence])
+    sentencePre = ' '.join([stem for word,c5,pos,stem in  StemmedSentencePre])
+    sentencePost = ' '.join([stem for word,c5,pos,stem in  StemmedSentencePOST])
+
     context = ' '.join([stem for word,c5,pos,stem in  StemmedSentence]) + ' '.join([stem for word,c5,pos,stem in  StemmedSentencePre]) + ' '.join([stem for word,c5,pos,stem in  StemmedSentencePOST])
-    CountOfSameNounInContext = context.count(VNC[1])
+    #CountOfSameNounInContext = context.count(VNC[1])
     SentenceLength = len(StemmedSentence)
 
     sentiments = SentimentsAVGPolarity(StemmedSentence)
     #Sentence,Usage,Idiom,POSBetween,NumOfWordsBetween,PrePOS,prePOS2,postPOS,postPOS2,CountOfSameNounInContext,SentenceLength,SentimentsAVG
-    pdd.loc[seq] = [sentence,usage,idiom,WordsBetween,NumOfWordsBetween,prePOS,prePOS2,postPOS,postPOS2,CountOfSameNounInContext,
-                    SentenceLength,sentiments]
+    #pdd.loc[seq] = [sentence,usage,idiom,WordsBetween,NumOfWordsBetween,prePOS,prePOS2,postPOS,postPOS2,CountOfSameNounInContext,
+    #                SentenceLength,sentiments]
+    pdd2.loc[seq] = [sentencePre,sentence,sentencePost,str(idiom),usage]
     seq += 1
     if seq %10 == 0:
         print(seq)
-        pdd.to_csv('Dataset5.csv')
+        pdd2.to_csv('Dataset6.csv')
 #print(pdd)
