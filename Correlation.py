@@ -6,7 +6,8 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 import seaborn
 
-#0,1.Sentence,2.Usage,3.Idiom,4.BetweenPOS,5.NumOfWordsBetween,6.PrePOS,7.prePOS2,8.postPOS,9.postPOS2,10.CountOfSameNounInContext,11.SentenceLength,12.SentimentsAVG
+#0,1.Sentence,2.Usage,3.Idiom,4.BetweenPOS,5.NumOfWordsBetween,6.PrePOS,7.prePOS2,8.postPOS,9.postPOS2,10.CountOfSameNounInContext,
+# 11.SentenceLength,12.SentimentsAVG
 #2.Usage, 5.NumOfWordsBetween, 10.CountOfSameNounInContext,  11.SentenceLength,  12.SentimentsAVG
 df  =pd.read_csv('Dataset5.csv', header=0, sep=',')
 Y = df.values[:,2]
